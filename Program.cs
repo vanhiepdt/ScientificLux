@@ -529,16 +529,6 @@ namespace ScientificLux
                 player.Spellbook.CastSpell(Ignite, target);       
         }
 
-        private static void autospells(Obj_AI_Base target)
-        {
-            var qpred = Q.GetPrediction(target);
-            if (target.IsStunned || target.IsRooted || 
-                target.HasBuffOfType(BuffType.Charm) ||
-                target.HasBuffOfType(BuffType.Suppression))
-
-                Q.Cast(qpred.CastPosition);
-        }
-
         private static void wlogic()
         {
             if (player.HasBuff("zedulttargetmark")
@@ -708,7 +698,6 @@ namespace ScientificLux
             {
                 E.Cast();
             }
-            autospells(target);
         }
     }
 }
