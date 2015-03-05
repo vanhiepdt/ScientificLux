@@ -477,6 +477,9 @@ namespace ScientificLux
         {
             Ignite = player.GetSpellSlot("summonerdot");
             var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
+            if (target == null || !target.IsValidTarget())
+                return;
+                        
             float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (player.Distance(target.ServerPosition) / R.Speed*500)));
             var rdmg = R.GetDamage(target);
             var rpdmg = R.GetDamage(target) + 10 + (8*player.Level) + player.FlatMagicDamageMod*0.2;
