@@ -585,7 +585,7 @@ namespace ScientificLux
                 return;
 
             if (E.IsReady()
-                && player.Distance(target) >= Q.Range
+                && player.Distance(target) >= Orbwalking.GetRealAutoAttackRange(player)
                 && LuxE.Position.CountEnemiesInRange(E.Width) >= 1)
                 E.Cast();
 
