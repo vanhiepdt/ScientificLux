@@ -226,7 +226,7 @@ namespace ScientificLux
                 Ecasted = false;
         }
         public static bool Ecasted { get; set; }
-        private static void GameObject_OnCreate(GameObject sender, EventArgs args) //I found this on pornhub trust me, no copy pasterino. 
+        private static void GameObject_OnCreate(GameObject sender, EventArgs args) //I found this on pornhub trust me, no copy pasterino. //Credits to Chewymoon
         {
                 if (sender.Name.Contains("LuxLightstrike_tar_green") || sender.Name.Contains("LuxLightstrike_tar_red"))
                 
