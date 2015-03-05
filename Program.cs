@@ -204,16 +204,16 @@ namespace ScientificLux
 
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (player.IsDead || gapcloser.Sender.IsInvulnerable || !Config.Item("AntiGap").GetValue<bool>())
+            if (player.IsDead || gapcloser.Sender.IsInvulnerable)
                 return;
 
             var targetpos = Drawing.WorldToScreen(gapcloser.Sender.Position);
-            if (gapcloser.Sender.IsValidTarget(Q.Range))
+            if (gapcloser.Sender.IsValidTarget(Q.Range) && Config.Item("AntiGap").GetValue<bool>())
             {
                 Render.Circle.DrawCircle(gapcloser.Sender.Position, gapcloser.Sender.BoundingRadius, Color.DeepPink);
                 Drawing.DrawText(targetpos[0] - 40, targetpos[1] + 20, Color.MediumPurple, "GAPCLOSER!");
             }
-            if (Q.IsReady() && gapcloser.Sender.IsValidTarget(Orbwalking.GetRealAutoAttackRange(player)))
+            if (Q.IsReady() && gapcloser.Sender.IsValidTarget(Orbwalking.GetRealAutoAttackRange(player)) && Config.Item("AntiGap").GetValue<bool>())
                 Q.Cast(gapcloser.Sender);
         }
 
