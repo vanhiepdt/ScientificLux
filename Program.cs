@@ -70,9 +70,9 @@ namespace ScientificLux
             var drawing = Config.AddSubMenu(new Menu("[SL]: Draw Settings", "Draw Settings"));
 
 
-            combo.SubMenu("[SBTW]ManaManager").AddItem(new MenuItem("qmana", "[Q] Mana %").SetValue(new Slider(15, 100, 0)));
-            combo.SubMenu("[SBTW]ManaManager").AddItem(new MenuItem("wmana", "[W] Mana %").SetValue(new Slider(25, 100, 0)));
-            combo.SubMenu("[SBTW]ManaManager").AddItem(new MenuItem("emana", "[E] Mana %").SetValue(new Slider(15, 100, 0)));
+            combo.SubMenu("[SBTW]ManaManager").AddItem(new MenuItem("qmana", "[Q] Mana %").SetValue(new Slider(10, 100, 0)));
+            combo.SubMenu("[SBTW]ManaManager").AddItem(new MenuItem("wmana", "[W] Mana %").SetValue(new Slider(20, 100, 0)));
+            combo.SubMenu("[SBTW]ManaManager").AddItem(new MenuItem("emana", "[E] Mana %").SetValue(new Slider(5, 100, 0)));
             combo.SubMenu("[SBTW]ManaManager").AddItem(new MenuItem("rmana", "[R] Mana %").SetValue(new Slider(10, 100, 0)));
 
             combo.SubMenu("[Q] Settings").AddItem(new MenuItem("UseQ", "Use Q - Light Binding").SetValue(true));
@@ -309,11 +309,11 @@ namespace ScientificLux
 
             if (target.IsValidTarget(Q.Range)
                     && minioncol <= 1
-                    && Config.Item("QHarass").GetValue<bool>()
+                    && Config.Item("Qharass").GetValue<bool>()
                     && qpred.Hitchance >= HitChance.VeryHigh && player.ManaPercentage() >= harassmana)
                     Q.Cast(qpred.CastPosition);
 
-            if (E.IsReady() && target.IsValidTarget(E.Range) && Config.Item("EHarass").GetValue<bool>() && player.ManaPercentage() >= harassmana)
+            if (E.IsReady() && target.IsValidTarget(E.Range) && Config.Item("Eharass").GetValue<bool>() && player.ManaPercentage() >= harassmana)
                 elogic();
         }
         private static float IgniteDamage(Obj_AI_Hero target)
@@ -344,7 +344,7 @@ namespace ScientificLux
                     var rpred = R.GetPrediction(enemy);
                     var qpred = R.GetPrediction(enemy);
                     var epred = R.GetPrediction(enemy);
-
+                    float predictedHealth = HealthPrediction.GetHealthPrediction(enemy, (int)(R.Delay + (player.Distance(enemy.ServerPosition) / R.Speed*1000)));
                     if (enemy.Health < edmg && epred.Hitchance >= HitChance.High && E.IsReady() && Config.Item("KSE").GetValue<bool>())
                         E.Cast(enemy);
                     if (enemy.Health < qdmg && qpred.Hitchance >= HitChance.High && Q.IsReady() && Config.Item("KSQ").GetValue<bool>())
@@ -359,7 +359,7 @@ namespace ScientificLux
                         epred.Hitchance >= HitChance.High)
                         return;
 
-                    if (enemy.Health < rdmg && rpred.Hitchance >= HitChance.High && R.IsReady() && Config.Item("KSR").GetValue<bool>())
+                    if (predictedHealth < rdmg && rpred.Hitchance >= HitChance.High && R.IsReady() && Config.Item("KSR").GetValue<bool>())
                         R.Cast(rpred.CastPosition);
                 }
             }
@@ -456,7 +456,7 @@ namespace ScientificLux
         {
             Ignite = player.GetSpellSlot("summonerdot");
             var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
-            float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (player.Distance(target.ServerPosition) / R.Speed)));
+            float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (player.Distance(target.ServerPosition) / R.Speed*1000)));
             var rdmg = R.GetDamage(target);
             var rpdmg = R.GetDamage(target) + 10 + (8*player.Level) + player.FlatMagicDamageMod*0.2;
             var rpred = R.GetPrediction(target);
@@ -531,18 +531,25 @@ namespace ScientificLux
                 return;
 
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsAlly && h.IsMe))
+        
             if (Config.Item("UseWP").GetValue<bool>() 
              && (player.HealthPercentage() <= Config.Item("UseWHP").GetValue<Slider>().Value
-             && W.IsReady() && player.Position.CountEnemiesInRange(W.Range) >= 1))
+             && W.IsReady() && player.Position.CountEnemiesInRange(W.Range) >= 1) 
+             || player.HasBuffOfType(BuffType.Slow) && player.Position.CountEnemiesInRange(W.Range) >= 1  || player.HasBuffOfType(BuffType.Poison) && player.Position.CountEnemiesInRange(W.Range) >= 1 
+             || player.HasBuffOfType(BuffType.Snare)  && player.Position.CountEnemiesInRange(W.Range) >= 1)
 
              W.Cast(hero.Position);
             
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsAlly && !h.IsMe))
             {
                 var wpred = W.GetPrediction(hero);
+                if (player.Distance(hero) > W.Range) return;
                 if (Config.Item("UseWA").GetValue<bool>() &&
                     (hero.HealthPercentage() <= Config.Item("UseWAHP").GetValue<Slider>().Value && W.IsReady() &&
-                    hero.Distance(player.ServerPosition) <= W.Range && wpred.Hitchance >= HitChance.High) && hero.Position.CountEnemiesInRange(W.Range) >= 1)
+                    hero.Distance(player.ServerPosition) <= W.Range && wpred.Hitchance >= HitChance.High) && hero.Position.CountEnemiesInRange(W.Range) >= 1
+                    || hero.HasBuffOfType(BuffType.Slow) && hero.Position.CountEnemiesInRange(W.Range) >= 1
+                    || hero.HasBuffOfType(BuffType.Poison) && hero.Position.CountEnemiesInRange(W.Range) >= 1
+                    || hero.HasBuffOfType(BuffType.Snare) && hero.Position.CountEnemiesInRange(W.Range) >= 1)
                    
                     W.Cast(wpred.CastPosition);
 
@@ -555,18 +562,19 @@ namespace ScientificLux
                     || hero.HasBuff("leblancsoulshackle")
                     || hero.HasBuff("mordekaiserchildrenofthegrave"))
 
-                    W.Cast(player.Position);
+                    W.Cast(wpred.CastPosition);
             }
         }
     
         private static void elogic()
         {
             var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
+            var etarget = TargetSelector.GetTarget(2000, TargetSelector.DamageType.Magical);
             var epred = E.GetPrediction(target);
             var emana = Config.Item("emana").GetValue<Slider>().Value;
 
             if (E.IsReady() && LuxE == null && target.IsValidTarget(E.Range)
-            && epred.Hitchance >= HitChance.High
+            && epred.Hitchance >= HitChance.VeryHigh
             && E.IsReady() && player.ManaPercentage() >= emana )
                 E.Cast(epred.CastPosition);
 
@@ -577,7 +585,7 @@ namespace ScientificLux
                 return;
 
             if (E.IsReady()
-                && target.IsMoving
+                && player.Distance(target) > Q.Range
                 && LuxE.Position.CountEnemiesInRange(E.Width) >= 1)
                 E.Cast();
 
