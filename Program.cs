@@ -569,7 +569,6 @@ namespace ScientificLux
         private static void elogic()
         {
             var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
-            var etarget = TargetSelector.GetTarget(2000, TargetSelector.DamageType.Magical);
             var epred = E.GetPrediction(target);
             var emana = Config.Item("emana").GetValue<Slider>().Value;
 
@@ -648,7 +647,7 @@ namespace ScientificLux
         private static void Game_OnGameUpdate(EventArgs args)
         {
            var wmana = Config.Item("wmana").GetValue<Slider>().Value;
-           var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
+           var target = TargetSelector.GetTarget(20000, TargetSelector.DamageType.Magical);
 
            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                 Combo();
@@ -672,12 +671,15 @@ namespace ScientificLux
                 wlogic();
             }
 
-            autospells(target);
-
-            if (LuxE != null
-            && target.IsMoving
-            && player.Distance(target) > Orbwalking.GetRealAutoAttackRange(player) && LuxE.Position.CountEnemiesInRange(E.Width) >= 1)
+            if (LuxE != null &&
+                target.IsMoving
+                && player.Distance(target) > Orbwalking.GetRealAutoAttackRange(player) &&
+                LuxE.Position.CountEnemiesInRange(E.Width) >= 1)
+            {
                 E.Cast();
+            }
+
+            autospells(target);
 
         }
     }
