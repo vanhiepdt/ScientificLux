@@ -342,8 +342,8 @@ namespace ScientificLux
                     var edmg = W.GetDamage(enemy);
                     var rdmg = E.GetDamage(enemy);
                     var rpred = R.GetPrediction(enemy);
-                    var qpred = R.GetPrediction(enemy);
-                    var epred = R.GetPrediction(enemy);
+                    var qpred = Q.GetPrediction(enemy);
+                    var epred = E.GetPrediction(enemy);
                     float predictedHealth = HealthPrediction.GetHealthPrediction(enemy, (int)(R.Delay + (player.Distance(enemy.ServerPosition) / R.Speed*1000)));
                     if (enemy.Health < edmg && epred.Hitchance >= HitChance.High && E.IsReady() && Config.Item("KSE").GetValue<bool>())
                         E.Cast(enemy);
