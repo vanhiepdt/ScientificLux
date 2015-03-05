@@ -43,7 +43,7 @@ namespace ScientificLux
             if (player.ChampionName != ChampName)
                 return;
 
-            Notifications.AddNotification("Scientific Lux [Version 1.2.1.0]", 8000);
+            Notifications.AddNotification("Scientific Lux - [V.2.2.4.1]", 8000);
 
             Q = new Spell(SpellSlot.Q, 1175);
             Q.SetSkillshot(0.4f, 68f, 1200f, false, SkillshotType.SkillshotLine);
@@ -268,7 +268,7 @@ namespace ScientificLux
                     var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
                     var rpredl = R.GetPrediction(target).CastPosition;
                     float predictedHealth = HealthPrediction.GetHealthPrediction(target,
-                        (int) (R.Delay + (player.Distance(target.ServerPosition)/R.Speed*1000)));
+                        (int) (R.Delay + (player.Distance(target.ServerPosition)/R.Speed*500)));
                     var rdmg = R.GetDamage(target);
                     var rpdmg = R.GetDamage(target) + 10 + (8*player.Level) + player.FlatMagicDamageMod*0.2;
                     var rpred = R.GetPrediction(target);
@@ -478,7 +478,7 @@ namespace ScientificLux
         {
             Ignite = player.GetSpellSlot("summonerdot");
             var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
-            float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (player.Distance(target.ServerPosition) / R.Speed*1000)));
+            float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (player.Distance(target.ServerPosition) / R.Speed*500)));
             var rdmg = R.GetDamage(target);
             var rpdmg = R.GetDamage(target) + 10 + (8*player.Level) + player.FlatMagicDamageMod*0.2;
             var rpred = R.GetPrediction(target);
@@ -522,7 +522,7 @@ namespace ScientificLux
             R.Cast(rpred.CastPosition);
 
             if (player.Distance(target) <= 600 && ripdmg >= target.Health && 
-            Config.Item("UseIgnite").GetValue<bool>() && R.IsReady())
+            Config.Item("UseIgnite").GetValue<bool>() && R.IsReady() && Ignite.IsReady())
                 player.Spellbook.CastSpell(Ignite, target);       
         }
 
