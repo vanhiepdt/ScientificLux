@@ -146,7 +146,7 @@ namespace ScientificLux
 
             Config.AddToMainMenu();
 
-            Game.OnUpdate += Game_OnGameUpdate;
+            Game.OnGameUpdate += Game_OnGameUpdate;
             GameObject.OnDelete += LuxEgone;
             GameObject.OnCreate += GameObject_OnCreate;
             Drawing.OnDraw += OnDraw;
@@ -670,22 +670,17 @@ namespace ScientificLux
         {
            var wmana = Config.Item("wmana").GetValue<Slider>().Value;
            var target = TargetSelector.GetTarget(20000, TargetSelector.DamageType.Magical);
-           
-           switch (Orbwalker.ActiveMode)
-            {
-                case Orbwalking.OrbwalkingMode.Combo:
-                    Combo();
-                    rlogic();
-                    break;
-                case Orbwalking.OrbwalkingMode.Mixed:
-                    Harass();
-                    break;
-                case Orbwalking.OrbwalkingMode.LaneClear:
-                    Laneclear();
-                    Jungleclear();
-                    break;
-            }
-               
+
+           if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+                Combo();
+           if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+               rlogic();
+           if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
+               Harass();
+           if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
+               Laneclear();
+           if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
+               Jungleclear();
            if (Config.Item("jungleks").GetValue<KeyBind>().Active)
                Junglesteal();
 
@@ -705,7 +700,9 @@ namespace ScientificLux
             {
                 E.Cast();
             }
+
             autospells(target);
+
         }
     }
 }
