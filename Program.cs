@@ -548,7 +548,7 @@ namespace ScientificLux
         
             if (Config.Item("UseWP").GetValue<bool>() 
              && (player.HealthPercentage() <= Config.Item("UseWHP").GetValue<Slider>().Value
-             && W.IsReady() && player.Position.CountEnemiesInRange(W.Range) >= 1) 
+             && W.IsReady() && player.Position.CountEnemiesInRange(W.Range) >= 1 && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo) 
              || player.HasBuffOfType(BuffType.Slow) && player.Position.CountEnemiesInRange(W.Range) >= 1  || player.HasBuffOfType(BuffType.Poison) && player.Position.CountEnemiesInRange(W.Range) >= 1 
              || player.HasBuffOfType(BuffType.Snare)  && player.Position.CountEnemiesInRange(W.Range) >= 1)
 
