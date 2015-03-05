@@ -266,6 +266,9 @@ namespace ScientificLux
 
                 {
                     var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
+                    if (target == null || !target.IsValidTarget())
+                        return;
+                    
                     var rpredl = R.GetPrediction(target).CastPosition;
                     float predictedHealth = HealthPrediction.GetHealthPrediction(target,
                         (int) (R.Delay + (player.Distance(target.ServerPosition)/R.Speed*500)));
