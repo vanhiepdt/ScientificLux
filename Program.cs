@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Drawing.Printing;
 using System.Linq;
+using System.Runtime.Remoting.Channels;
 using System.Security.Authentication.ExtendedProtection;
 using LeagueSharp;
 using LeagueSharp.Common;
@@ -25,6 +26,7 @@ namespace ScientificLux
         public static Spell E;
         public static Spell R;
 
+        public static HpBarIndicator Hpi = new HpBarIndicator();
         private static SpellSlot Ignite;
         private static SpellSlot Flash;
         private static int LastCast;
@@ -41,6 +43,7 @@ namespace ScientificLux
 
         private static void OnLoad(EventArgs args)
         {
+
             if (player.ChampionName != ChampName)
                 return;
 
@@ -65,6 +68,7 @@ namespace ScientificLux
             var killsteal = Config.AddSubMenu(new Menu("[SL]: Killsteal Settings", "Killsteal Settings"));
             var laneclear = Config.AddSubMenu(new Menu("[SL]: Laneclear Settings", "Laneclear Settings"));
             var jungleclear = Config.AddSubMenu(new Menu("[SL]: Jungle Settings", "Jungle Settings"));
+            var misc = Config.AddSubMenu(new Menu("[SL]: Misc Settings", "Misc Settings"));
             var drawing = Config.AddSubMenu(new Menu("[SL]: Draw Settings", "Draw Settings"));
 
 
@@ -93,21 +97,27 @@ namespace ScientificLux
             combo.SubMenu("Summoner Settings").AddItem(new MenuItem("UseIgnite", "Use Ignite").SetValue(true));
 
             killsteal.AddItem(new MenuItem("SmartKS", "Use SmartKS").SetValue(true));
-            killsteal.AddItem(new MenuItem("SmartI", "Use Ignite").SetValue(true));
-            killsteal.AddItem(new MenuItem("SmartQ", "Use Q").SetValue(true));
-            killsteal.AddItem(new MenuItem("SmartE", "Use E").SetValue(true));
-            killsteal.AddItem(new MenuItem("SmartR", "Use R").SetValue(true));
+            killsteal.AddItem(new MenuItem("KSI", "Use Ignite").SetValue(true));
+            killsteal.AddItem(new MenuItem("KSQ", "Use Q").SetValue(true));
+            killsteal.AddItem(new MenuItem("KSE", "Use E").SetValue(true));
+            killsteal.AddItem(new MenuItem("KSR", "Use R").SetValue(true));
 
-            drawing.AddItem(new MenuItem("Draw_Disabled", "Disable All Spell Drawings").SetValue(false));
+            drawing.AddItem(new MenuItem("Draw_Disabled", "Disable All Drawings").SetValue(false));
             drawing.AddItem(new MenuItem("Qdraw", "Draw Q Range").SetValue(new Circle(true, Color.Orange)));
             drawing.AddItem(new MenuItem("Wdraw", "Draw W Range").SetValue(new Circle(true, Color.DarkOrange)));
             drawing.AddItem(new MenuItem("Edraw", "Draw E Range").SetValue(new Circle(true, Color.AntiqueWhite)));
             drawing.AddItem(new MenuItem("Rdraw", "Draw R Range").SetValue(new Circle(true, Color.CornflowerBlue)));
             drawing.AddItem(new MenuItem("RLine", "Draw [R] Prediction").SetValue(new Circle(true, Color.SkyBlue)));
 
-            harass.AddItem(new MenuItem("harassQ", "Use Q").SetValue(true));
-            harass.AddItem(new MenuItem("harassE", "Use E").SetValue(true));
+            harass.AddItem(new MenuItem("Qharass", "Use Q").SetValue(true));
+            harass.AddItem(new MenuItem("Eharass", "Use E").SetValue(true));
             harass.AddItem(new MenuItem("harassmana", "Mana Percentage").SetValue(new Slider(30, 100, 0)));
+
+            misc
+                .AddItem(new MenuItem("DamageInd", "Damage Indicator").SetValue(true));
+            misc
+                .AddItem(new MenuItem("AntiGap", "AntiGapCloser [Q]").SetValue(true));
+
 
             laneclear
                 .AddItem(new MenuItem("laneQ", "Use Q").SetValue(true));
@@ -116,7 +126,6 @@ namespace ScientificLux
             laneclear
                 .AddItem(new MenuItem("lanemana", "Mana Percentage").SetValue(new Slider(30, 100, 0)));
 
-            //JUNGLEFARMMENU
 
             jungleclear
                 .AddItem(new MenuItem("jungleQ", "Use Q").SetValue(true));
@@ -132,6 +141,72 @@ namespace ScientificLux
             GameObject.OnCreate += GameObject_OnCreate;
             Drawing.OnDraw += OnDraw;
             Program.killsteal();
+            Drawing.OnEndScene += OnEndScene;
+            AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
+        }
+
+        private static void OnEndScene(EventArgs args)
+        {
+            if (Config.Item("DrawD").GetValue<bool>())
+            {
+                foreach (var enemy in
+                    ObjectManager.Get<Obj_AI_Hero>().Where(ene => !ene.IsDead && ene.IsEnemy && ene.IsVisible))
+                {
+                    Hpi.unit = enemy;
+                    Hpi.drawDmg(CalcDamage(enemy), Color.Green);
+                }
+            }
+        }
+        private static int CalcDamage(Obj_AI_Base target)
+        {
+            //Calculate Combo Damage
+            var aa = player.GetAutoAttackDamage(target, true); 
+            var damage = aa;
+            Ignite = player.GetSpellSlot("summonerdot");
+
+            if (Ignite.IsReady())
+                damage += player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
+
+            if (Config.Item("UseE").GetValue<bool>()) // edamage
+            {
+                if (E.IsReady())
+                {
+                    damage += E.GetDamage(target);
+                }
+            }
+            if (target.HasBuff("luxilluminatingfraulein"))
+            {
+                damage += aa +10 + (8 * player.Level) + player.FlatMagicDamageMod * 0.2;
+            }
+
+            if (R.IsReady() && Config.Item("UseR").GetValue<KeyBind>().Active) // rdamage
+            {
+
+                damage += R.GetDamage(target);
+            }
+
+            if (Q.IsReady() && Config.Item("UseQ").GetValue<bool>())
+            {
+                damage += Q.GetDamage(target);
+            }
+            return (int)damage;
+
+
+        }
+
+        private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
+        {
+            if (player.IsDead || gapcloser.Sender.IsInvulnerable || !Config.Item("AntiGap").GetValue<bool>())
+                return;
+
+            var targetpos = Drawing.WorldToScreen(gapcloser.Sender.Position);
+            if (gapcloser.Sender.IsValidTarget(Q.Range))
+            {
+                Render.Circle.DrawCircle(gapcloser.Sender.Position, gapcloser.Sender.BoundingRadius, Color.DeepPink);
+                Drawing.DrawText(targetpos[0] - 40, targetpos[1] + 20, Color.MediumPurple, "GAPCLOSER!");
+            }
+            if (Q.IsReady() && gapcloser.Sender.IsValidTarget(Orbwalking.GetRealAutoAttackRange(player)))
+                Q.Cast(gapcloser.Sender);
         }
 
         private static void LuxEgone(GameObject sender, EventArgs args)
@@ -153,7 +228,6 @@ namespace ScientificLux
 
         private static void OnDraw(EventArgs args)
         {
-
             if (Config.Item("Draw_Disabled").GetValue<bool>())
                 return;
             {
@@ -176,7 +250,6 @@ namespace ScientificLux
                     if (R.Level > 0)
                         Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range - 2,
                             R.IsReady() ? Config.Item("Rdraw").GetValue<Circle>().Color : Color.Red);
-
 
                 {
                     var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
@@ -206,15 +279,14 @@ namespace ScientificLux
                         rdraw.Draw(Config.Item("RLine").GetValue<Circle>().Color, 4);
 
                     var orbwalkert = Orbwalker.GetTarget();
-                    Render.Circle.DrawCircle(orbwalkert.Position, 30, Color.DeepSkyBlue, 15);
-                    Render.Circle.DrawCircle(target.Position, 30, Color.DeepSkyBlue, 15);
+                    Render.Circle.DrawCircle(orbwalkert.Position, 10, Color.DeepSkyBlue, 15);
                 }
             }
         }
 
         private static void Harass()
         {
-            var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
             if (target.IsInvulnerable)
                 return;
@@ -225,13 +297,20 @@ namespace ScientificLux
 
             if (target.IsValidTarget(Q.Range)
                     && minioncol <= 1
-                    && Config.Item("qHarass").GetValue<bool>()
+                    && Config.Item("QHarass").GetValue<bool>()
                     && qpred.Hitchance >= HitChance.VeryHigh && player.ManaPercentage() >= harassmana)
                     Q.Cast(qpred.CastPosition);
 
-            if (E.IsReady() && target.IsValidTarget(E.Range) && Config.Item("eHarass").GetValue<bool>() && player.ManaPercentage() >= harassmana)
+            if (E.IsReady() && target.IsValidTarget(E.Range) && Config.Item("EHarass").GetValue<bool>() && player.ManaPercentage() >= harassmana)
                 elogic();
         }
+        private static float IgniteDamage(Obj_AI_Hero target)
+        {
+            if (Ignite == SpellSlot.Unknown || player.Spellbook.CanUseSpell(Ignite) != SpellState.Ready)
+                return 0f;
+            return (float)player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
+        }
+
         private static void killsteal()
         {
             {
@@ -243,7 +322,7 @@ namespace ScientificLux
                  ObjectManager.Player.Distance(hero.ServerPosition) <= R.Range && !hero.IsMe &&
                  hero.IsValidTarget() && hero.IsEnemy && !hero.IsInvulnerable))
                 {
-
+                    Ignite = player.GetSpellSlot("summonerdot");
                     var qdmg = Q.GetDamage(hero);
                     var edmg = W.GetDamage(hero);
                     var rdmg = E.GetDamage(hero);
@@ -251,10 +330,13 @@ namespace ScientificLux
                     var qpred = R.GetPrediction(hero);
                     var epred = R.GetPrediction(hero);
 
-                    if (hero.Health < edmg && rpred.Hitchance >= HitChance.High && R.IsReady())
-                        E.Cast(epred.CastPosition);
-                    if (hero.Health < qdmg && rpred.Hitchance >= HitChance.High && R.IsReady())
-                        Q.Cast(qpred.CastPosition);
+                    if (hero.Health < edmg && epred.Hitchance >= HitChance.High && E.IsReady() && Config.Item("KSE").GetValue<bool>())
+                        E.Cast(hero);
+                    if (hero.Health < qdmg && qpred.Hitchance >= HitChance.High && Q.IsReady() && Config.Item("KSQ").GetValue<bool>())
+                        Q.Cast(hero);
+                    if (player.Distance(hero) <= 600 && IgniteDamage(hero) >= hero.Health &&
+                         Config.Item("KSI").GetValue<bool>())
+                        player.Spellbook.CastSpell(Ignite, hero);
 
                     if (hero.Health < qdmg && hero.IsValidTarget(Q.Range) && Q.IsReady() &&
                         qpred.Hitchance >= HitChance.High ||
@@ -262,10 +344,15 @@ namespace ScientificLux
                         epred.Hitchance >= HitChance.High)
                         return;
 
-                    if (hero.Health < rdmg && rpred.Hitchance >= HitChance.High && R.IsReady())
+                    if (hero.Health < rdmg && rpred.Hitchance >= HitChance.High && R.IsReady() && Config.Item("KSR").GetValue<bool>())
                         R.Cast(rpred.CastPosition);
                 }
             }
+        }
+
+        private static void Junglesteal()
+        {
+            
         }
 
         private static void Jungleclear()
@@ -316,11 +403,14 @@ namespace ScientificLux
 
         private static void rlogic()
         {
+            Ignite = player.GetSpellSlot("summonerdot");
             var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
             float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (player.Distance(target.ServerPosition) / R.Speed)));
             var rdmg = R.GetDamage(target);
             var rpdmg = R.GetDamage(target) + 10 + (8*player.Level) + player.FlatMagicDamageMod*0.2;
             var rpred = R.GetPrediction(target);
+            var ripdmg = R.GetDamage(target) + 10 + (8*player.Level) + player.FlatMagicDamageMod*0.2 +
+                         IgniteDamage(target);
 
             if (target.IsInvulnerable)
                 return;
@@ -353,7 +443,11 @@ namespace ScientificLux
             && rpred.Hitchance >= HitChance.VeryHigh 
             && predictedHealth <= rdmg 
             && target.Path.Count() <= 1)
-            R.Cast(rpred.CastPosition);                               
+            R.Cast(rpred.CastPosition);
+
+            if (player.Distance(target) <= 600 && ripdmg >= target.Health && 
+            Config.Item("UseIgnite").GetValue<bool>())
+                player.Spellbook.CastSpell(Ignite, target);       
         }
 
         private static void autospells(Obj_AI_Base target)
@@ -441,10 +535,9 @@ namespace ScientificLux
         }
         private static void Combo()
         {
+            Ignite = player.GetSpellSlot("summonerdot");
             var qmana = Config.Item("qmana").GetValue<Slider>().Value;
-            var rmana = Config.Item("rmana").GetValue<Slider>().Value;
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-            var rtarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
             if (target.IsInvulnerable)
                 return;
@@ -468,6 +561,10 @@ namespace ScientificLux
 
             else if (E.IsReady() && target.IsValidTarget(E.Range) && Config.Item("UseE").GetValue<bool>())
                 elogic();
+
+            if (player.Distance(target) <= 600 && IgniteDamage(target) >= target.Health &&
+            Config.Item("UseIgnite").GetValue<bool>())
+                player.Spellbook.CastSpell(Ignite, target);  
         }
 
 
