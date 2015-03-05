@@ -669,7 +669,7 @@ namespace ScientificLux
         private static void Game_OnGameUpdate(EventArgs args)
         {
            var wmana = Config.Item("wmana").GetValue<Slider>().Value;
-           var target = TargetSelector.GetTarget(20000, TargetSelector.DamageType.Magical);
+           var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
            
            switch (Orbwalker.ActiveMode)
             {
