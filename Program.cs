@@ -579,20 +579,20 @@ namespace ScientificLux
                 E.Cast(epred.CastPosition);
 
             if (E.IsReady() && LuxE.Position.CountEnemiesInRange(E.Width) < 1 && LuxE != null)
-                Utility.DelayAction.Add(2000, () => E.Cast());
+                Utility.DelayAction.Add(1000, () => E.Cast());
 
             if (target.IsInvulnerable)
                 return;
 
             if (E.IsReady()
-                && player.Distance(target) > Q.Range
+                && player.Distance(target) >= Q.Range
                 && LuxE.Position.CountEnemiesInRange(E.Width) >= 1)
                 E.Cast();
 
             if (LuxE.Position.CountEnemiesInRange(E.Width) >= 2)
                 E.Cast();
 
-            if (target.HasBuff("luxilluminatingfraulein") && player.Distance(target) < Q.Range)
+            if (target.HasBuff("luxilluminatingfraulein") && target.HasBuff("LuxLightBindingMis") && player.Distance(target) < Q.Range)
                 return;
 
             if (LuxE.Position.CountEnemiesInRange(E.Width) >= 1)
@@ -676,7 +676,7 @@ namespace ScientificLux
 
             if (LuxE != null
             && target.IsMoving
-            && LuxE.Position.CountEnemiesInRange(E.Width) >= 1 || player.Distance(target) > Orbwalking.GetRealAutoAttackRange(player) && LuxE.Position.CountEnemiesInRange(E.Width) >= 1)
+            && player.Distance(target) > Orbwalking.GetRealAutoAttackRange(player) && LuxE.Position.CountEnemiesInRange(E.Width) >= 1)
                 E.Cast();
 
         }
