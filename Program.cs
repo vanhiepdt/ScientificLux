@@ -133,6 +133,19 @@ namespace ScientificLux
                 .AddItem(new MenuItem("jungleE", "Use E").SetValue(true));
             jungleclear
                 .AddItem(new MenuItem("junglemana", "Mana Percentage").SetValue(new Slider(30, 100, 0)));
+            jungleclear
+                .AddItem(new MenuItem("blank", "                                        "));
+
+            jungleclear.AddItem(new MenuItem("jungleks", "Junglesteal (PRESS) ").SetValue(new KeyBind('K', KeyBindType.Toggle)));
+
+            jungleclear
+                .AddItem(new MenuItem("Blue", "Steal Bluebuff").SetValue(true));
+            jungleclear
+                .AddItem(new MenuItem("Red", "Steal Redbuff").SetValue(true));
+            jungleclear
+                .AddItem(new MenuItem("Dragon", "Steal Dragon").SetValue(true));
+            jungleclear
+                .AddItem(new MenuItem("Baron", "Steal Baron").SetValue(true));
 
             Config.AddToMainMenu();
 
@@ -352,8 +365,45 @@ namespace ScientificLux
 
         private static void Junglesteal()
         {
+           if (!R.IsReady())           
+                return;
+
+           Orbwalking.Orbwalk(null, Game.CursorPos);
+            
+            var blueBuff =
+                ObjectManager.Get<Obj_AI_Minion>()
+                    .Where(x => x.BaseSkinName == "SRU_Blue")
+                    .Where(x => player.GetSpellDamage(x, SpellSlot.R) > x.Health)
+                    .FirstOrDefault(x => ( x.IsAlly) || (x.IsEnemy));
+            if (blueBuff != null && Config.Item("Blue").GetValue<bool>())
+                R.Cast(blueBuff);
+
+                        var redBuff =
+                ObjectManager.Get<Obj_AI_Minion>()
+                    .Where(x => x.BaseSkinName == "SRU_Red")
+                    .Where(x => player.GetSpellDamage(x, SpellSlot.R) > x.Health)
+                    .FirstOrDefault(x => ( x.IsAlly) || (x.IsEnemy));
+            if (redBuff != null && Config.Item("Red").GetValue<bool>())
+                R.Cast(redBuff);
+
+                        var Baron =
+                ObjectManager.Get<Obj_AI_Minion>()
+                    .Where(x => x.BaseSkinName == "SRU_Baron")
+                    .Where(x => player.GetSpellDamage(x, SpellSlot.R) > x.Health)
+                    .FirstOrDefault(x => ( x.IsAlly) || (x.IsEnemy));
+                        if (Baron != null && Config.Item("Baron").GetValue<bool>())
+                R.Cast(Baron);
+
+                        var Dragon =
+                ObjectManager.Get<Obj_AI_Minion>()
+                    .Where(x => x.BaseSkinName == "SRU_Dragon")
+                    .Where(x => player.GetSpellDamage(x, SpellSlot.R) > x.Health)
+                    .FirstOrDefault(x => ( x.IsAlly) || (x.IsEnemy));
+                        if (Dragon != null && Config.Item("Dragon").GetValue<bool>())
+                R.Cast(Dragon);
             
         }
+        
 
         private static void Jungleclear()
         {
@@ -595,6 +645,8 @@ namespace ScientificLux
                Laneclear();
            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
                Jungleclear();
+           if (Config.Item("jungleks").GetValue<KeyBind>().Active)
+               Junglesteal();
 
 
             autospells(target);
