@@ -7,6 +7,6 @@ c:\users\haf911\documents\visual studio 2013\Projects\ScientificLux\ScientificLu
 c:\users\haf911\documents\visual studio 2013\Projects\ScientificLux\ScientificLux\bin\Release\SharpDX.dll
 c:\users\haf911\documents\visual studio 2013\Projects\ScientificLux\ScientificLux\bin\Release\clipper_library.dll
 c:\users\haf911\documents\visual studio 2013\Projects\ScientificLux\ScientificLux\bin\Release\LeagueSharp.xml
+c:\users\haf911\documents\visual studio 2013\Projects\ScientificLux\ScientificLux\obj\Debug\ScientificLux.csprojResolveAssemblyReference.cache
 c:\users\haf911\documents\visual studio 2013\Projects\ScientificLux\ScientificLux\obj\Debug\ScientificLux.exe
 c:\users\haf911\documents\visual studio 2013\Projects\ScientificLux\ScientificLux\obj\Debug\ScientificLux.pdb
-c:\users\haf911\documents\visual studio 2013\Projects\ScientificLux\ScientificLux\obj\Debug\ScientificLux.csprojResolveAssemblyReference.cache

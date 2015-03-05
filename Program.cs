@@ -34,11 +34,7 @@ namespace ScientificLux
 
         private static void Main(string[] args)
         {
-            //Welcome Message upon loading assembly.
-            Game.PrintChat(
-                "<font color=\"#00BFFF\">Scientific Lux -<font color=\"#FFFFFF\"> GODLIKE VERSION Successfully Loaded.</font>");
             CustomEvents.Game.OnGameLoad += OnLoad;
-
         }
 
         private static void OnLoad(EventArgs args)
@@ -46,6 +42,8 @@ namespace ScientificLux
 
             if (player.ChampionName != ChampName)
                 return;
+
+            Notifications.AddNotification("Scientific Lux [Version 1.2.1.0]", 8000);
 
             Q = new Spell(SpellSlot.Q, 1175);
             Q.SetSkillshot(0.4f, 68f, 1200f, false, SkillshotType.SkillshotLine);
@@ -57,7 +55,7 @@ namespace ScientificLux
             E.SetSkillshot(0.4f, 275f, 1300f, false, SkillshotType.SkillshotCircle);
 
             R = new Spell(SpellSlot.R, 3340f);
-            R.SetSkillshot(1.45f, 190f, float.MaxValue, false, SkillshotType.SkillshotLine);
+            R.SetSkillshot(1.50f, 190f, float.MaxValue, false, SkillshotType.SkillshotLine);
 
             Config = new Menu("Scientific Lux", "STLux", true);
             Orbwalker = new Orbwalking.Orbwalker(Config.AddSubMenu(new Menu("[SL]: Orbwalker", "Orbwalker")));
@@ -79,13 +77,11 @@ namespace ScientificLux
 
             combo.SubMenu("[Q] Settings").AddItem(new MenuItem("UseQ", "Use Q - Light Binding").SetValue(true));
 
-
             combo.SubMenu("[W] Settings").AddItem(new MenuItem("UseW", "Use W - Prismatic Barrier").SetValue(true));
             combo.SubMenu("[W] Settings").AddItem(new MenuItem("UseWP", "W on HP Percentage").SetValue(true));
             combo.SubMenu("[W] Settings").AddItem(new MenuItem("UseWHP", "Player HP%").SetValue(new Slider(80, 100, 1)));
             combo.SubMenu("[W] Settings").AddItem(new MenuItem("UseWA", "Use W on Allies").SetValue(true));
             combo.SubMenu("[W] Settings").AddItem(new MenuItem("UseWAHP", "Ally Hp %").SetValue(new Slider(30, 100, 1)));
-
 
             combo.SubMenu("[E] Settings").AddItem(new MenuItem("UseE", "Use E - Lucent Singularity").SetValue(true));
 
@@ -114,7 +110,7 @@ namespace ScientificLux
             harass.AddItem(new MenuItem("harassmana", "Mana Percentage").SetValue(new Slider(30, 100, 0)));
 
             misc
-                .AddItem(new MenuItem("DamageInd", "Damage Indicator").SetValue(true));
+                .AddItem(new MenuItem("DrawD", "Damage Indicator").SetValue(true));
             misc
                 .AddItem(new MenuItem("AntiGap", "AntiGapCloser [Q]").SetValue(true));
 
@@ -125,7 +121,7 @@ namespace ScientificLux
                 .AddItem(new MenuItem("laneE", "Use E").SetValue(true));
             laneclear
                 .AddItem(new MenuItem("lanemana", "Mana Percentage").SetValue(new Slider(30, 100, 0)));
-
+            
 
             jungleclear
                 .AddItem(new MenuItem("jungleQ", "Use Q").SetValue(true));
@@ -136,7 +132,7 @@ namespace ScientificLux
             jungleclear
                 .AddItem(new MenuItem("blank", "                                        "));
 
-            jungleclear.AddItem(new MenuItem("jungleks", "Junglesteal (PRESS) ").SetValue(new KeyBind('K', KeyBindType.Toggle)));
+            jungleclear.AddItem(new MenuItem("jungleks", "Junglesteal [PRESS] ").SetValue(new KeyBind('K', KeyBindType.Press)));
 
             jungleclear
                 .AddItem(new MenuItem("Blue", "Steal Bluebuff").SetValue(true));
@@ -153,7 +149,6 @@ namespace ScientificLux
             GameObject.OnDelete += LuxEgone;
             GameObject.OnCreate += GameObject_OnCreate;
             Drawing.OnDraw += OnDraw;
-            Program.killsteal();
             Drawing.OnEndScene += OnEndScene;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
         }
@@ -192,7 +187,7 @@ namespace ScientificLux
                 damage += aa +10 + (8 * player.Level) + player.FlatMagicDamageMod * 0.2;
             }
 
-            if (R.IsReady() && Config.Item("UseR").GetValue<KeyBind>().Active) // rdamage
+            if (R.IsReady() && Config.Item("UseR").GetValue<bool>()) // rdamage
             {
 
                 damage += R.GetDamage(target);
@@ -241,6 +236,10 @@ namespace ScientificLux
 
         private static void OnDraw(EventArgs args)
         {
+            var pos = Drawing.WorldToScreen(ObjectManager.Player.Position);
+            if (Config.Item("jungleks").GetValue<KeyBind>().Active)
+                Drawing.DrawText(pos.X - 50, pos.Y + 50, Color.HotPink, "[R] Junglesteal Enabled");
+
             if (Config.Item("Draw_Disabled").GetValue<bool>())
                 return;
             {
@@ -327,37 +326,40 @@ namespace ScientificLux
         private static void killsteal()
         {
             {
-                foreach (
-                 Obj_AI_Hero hero in
-                 ObjectManager.Get<Obj_AI_Hero>()
-                 .Where(
-                 hero =>
-                 ObjectManager.Player.Distance(hero.ServerPosition) <= R.Range && !hero.IsMe &&
-                 hero.IsValidTarget() && hero.IsEnemy && !hero.IsInvulnerable))
+            if (!R.IsReady())
+            {
+                return;
+            }
+
+            foreach (var enemy in
+                ObjectManager.Get<Obj_AI_Hero>()
+                    .Where(x => x.IsValidTarget())
+                    .Where(x => !x.IsZombie)
+                    .Where(x => !x.IsDead))
                 {
                     Ignite = player.GetSpellSlot("summonerdot");
-                    var qdmg = Q.GetDamage(hero);
-                    var edmg = W.GetDamage(hero);
-                    var rdmg = E.GetDamage(hero);
-                    var rpred = R.GetPrediction(hero);
-                    var qpred = R.GetPrediction(hero);
-                    var epred = R.GetPrediction(hero);
+                    var qdmg = Q.GetDamage(enemy);
+                    var edmg = W.GetDamage(enemy);
+                    var rdmg = E.GetDamage(enemy);
+                    var rpred = R.GetPrediction(enemy);
+                    var qpred = R.GetPrediction(enemy);
+                    var epred = R.GetPrediction(enemy);
 
-                    if (hero.Health < edmg && epred.Hitchance >= HitChance.High && E.IsReady() && Config.Item("KSE").GetValue<bool>())
-                        E.Cast(hero);
-                    if (hero.Health < qdmg && qpred.Hitchance >= HitChance.High && Q.IsReady() && Config.Item("KSQ").GetValue<bool>())
-                        Q.Cast(hero);
-                    if (player.Distance(hero) <= 600 && IgniteDamage(hero) >= hero.Health &&
+                    if (enemy.Health < edmg && epred.Hitchance >= HitChance.High && E.IsReady() && Config.Item("KSE").GetValue<bool>())
+                        E.Cast(enemy);
+                    if (enemy.Health < qdmg && qpred.Hitchance >= HitChance.High && Q.IsReady() && Config.Item("KSQ").GetValue<bool>())
+                        Q.Cast(enemy);
+                    if (player.Distance(enemy) <= 600 && IgniteDamage(enemy) >= enemy.Health &&
                          Config.Item("KSI").GetValue<bool>())
-                        player.Spellbook.CastSpell(Ignite, hero);
+                        player.Spellbook.CastSpell(Ignite, enemy);
 
-                    if (hero.Health < qdmg && hero.IsValidTarget(Q.Range) && Q.IsReady() &&
+                    if (enemy.Health < qdmg && enemy.IsValidTarget(Q.Range) && Q.IsReady() &&
                         qpred.Hitchance >= HitChance.High ||
-                        hero.Health < edmg && hero.IsValidTarget(E.Range) && E.IsReady() &&
+                        enemy.Health < edmg && enemy.IsValidTarget(E.Range) && E.IsReady() &&
                         epred.Hitchance >= HitChance.High)
                         return;
 
-                    if (hero.Health < rdmg && rpred.Hitchance >= HitChance.High && R.IsReady() && Config.Item("KSR").GetValue<bool>())
+                    if (enemy.Health < rdmg && rpred.Hitchance >= HitChance.High && R.IsReady() && Config.Item("KSR").GetValue<bool>())
                         R.Cast(rpred.CastPosition);
                 }
             }
@@ -365,10 +367,9 @@ namespace ScientificLux
 
         private static void Junglesteal()
         {
+            Orbwalking.Orbwalk(null, Game.CursorPos);
            if (!R.IsReady())           
                 return;
-
-           Orbwalking.Orbwalk(null, Game.CursorPos);
             
             var blueBuff =
                 ObjectManager.Get<Obj_AI_Minion>()
@@ -464,6 +465,11 @@ namespace ScientificLux
 
             if (target.IsInvulnerable)
                 return;
+            if (target.IsValidTarget(R.Range)
+            && R.IsReady()
+            && Config.Item("UseRA").GetValue<bool>()
+            && rpred.Hitchance >= HitChance.High)
+                R.CastIfWillHit(target, Config.Item("RA").GetValue<Slider>().Value);
 
            if (target.IsValidTarget(R.Range)
              && R.IsReady()
@@ -472,13 +478,11 @@ namespace ScientificLux
              && target.HasBuff("LuxLightBindingMis"))
              R.Cast(rpred.CastPosition);
 
-
-          if (target.IsValidTarget(R.Range)
-             && R.IsReady()
-             && Config.Item("UseRA").GetValue<bool>()
-             && rpred.Hitchance >= HitChance.High)
-             R.CastIfWillHit(target, Config.Item("RA").GetValue<Slider>().Value);
-
+            if (E.IsReady() && player.Distance(target) < Orbwalking.GetRealAutoAttackRange(player) &&
+                LuxE.Position.CountEnemiesInRange(E.Width) >= 1 && target.Health <= E.GetDamage(target)
+                || target.Health < player.GetAutoAttackDamage(target) * 2
+                && player.Distance(target) <= Orbwalking.GetRealAutoAttackRange(player))
+                return;
 
            if (target.IsValidTarget(R.Range)
             && rpred.Hitchance >= HitChance.VeryHigh
@@ -496,7 +500,7 @@ namespace ScientificLux
             R.Cast(rpred.CastPosition);
 
             if (player.Distance(target) <= 600 && ripdmg >= target.Health && 
-            Config.Item("UseIgnite").GetValue<bool>())
+            Config.Item("UseIgnite").GetValue<bool>() && R.IsReady())
                 player.Spellbook.CastSpell(Ignite, target);       
         }
 
@@ -526,12 +530,12 @@ namespace ScientificLux
             if (player.HasBuff("Recall") || Utility.InFountain(player) || player.IsDead)
                 return;
 
-
+            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsAlly && h.IsMe))
             if (Config.Item("UseWP").GetValue<bool>() 
              && (player.HealthPercentage() <= Config.Item("UseWHP").GetValue<Slider>().Value
              && W.IsReady() && player.Position.CountEnemiesInRange(W.Range) >= 1))
 
-             W.Cast(player.Position);
+             W.Cast(hero.Position);
             
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsAlly && !h.IsMe))
             {
@@ -565,6 +569,9 @@ namespace ScientificLux
             && epred.Hitchance >= HitChance.High
             && E.IsReady() && player.ManaPercentage() >= emana )
                 E.Cast(epred.CastPosition);
+
+            if (E.IsReady() && LuxE.Position.CountEnemiesInRange(E.Width) < 1 && LuxE != null)
+                Utility.DelayAction.Add(2000, () => E.Cast());
 
             if (target.IsInvulnerable)
                 return;
@@ -648,6 +655,14 @@ namespace ScientificLux
            if (Config.Item("jungleks").GetValue<KeyBind>().Active)
                Junglesteal();
 
+            if (Config.Item("SmartKS").GetValue<bool>())
+            {
+                killsteal();
+            }
+            if (Config.Item("UseW").GetValue<bool>() && player.ManaPercentage() >= wmana)
+            {
+                wlogic();
+            }
 
             autospells(target);
 
@@ -656,8 +671,6 @@ namespace ScientificLux
             && LuxE.Position.CountEnemiesInRange(E.Width) >= 1 || player.Distance(target) > Orbwalking.GetRealAutoAttackRange(player) && LuxE.Position.CountEnemiesInRange(E.Width) >= 1)
                 E.Cast();
 
-            if (Config.Item("UseW").GetValue<bool>() && player.ManaPercentage() >= wmana)
-                wlogic();
         }
     }
 }
