@@ -20,11 +20,7 @@ namespace ScientificLux
         public static Menu Config;
 
         public static Orbwalking.Orbwalker Orbwalker;
-
-        public static Spell Q;
-        public static Spell W;
-        public static Spell E;
-        public static Spell R;
+        public static Spell Q, W, E, R;
 
         public static HpBarIndicator Hpi = new HpBarIndicator();
         private static SpellSlot Ignite;
@@ -617,6 +613,8 @@ namespace ScientificLux
             Ignite = player.GetSpellSlot("summonerdot");
             var qmana = Config.Item("qmana").GetValue<Slider>().Value;
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+             if (target == null || !target.IsValidTarget())
+                        return;
 
             if (target.IsInvulnerable)
                 return;
