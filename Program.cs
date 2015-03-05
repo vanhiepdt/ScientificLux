@@ -106,7 +106,7 @@ namespace ScientificLux
             drawing.AddItem(new MenuItem("RLine", "Draw [R] Prediction").SetValue(new Circle(true, Color.SkyBlue)));
 
             harass.AddItem(new MenuItem("Qharass", "Use Q").SetValue(true));
-            harass.AddItem(new MenuItem("Qharassslowed", "Only use Q if target is slowed/stunned/rooted").SetValue(true));
+            harass.AddItem(new MenuItem("Qharassslowed", "Use Q").SetValue(true));
             harass.AddItem(new MenuItem("Eharass", "Use E").SetValue(true));
             harass.AddItem(new MenuItem("harassmana", "Mana Percentage").SetValue(new Slider(30, 100, 0)));
 
@@ -146,7 +146,7 @@ namespace ScientificLux
 
             Config.AddToMainMenu();
 
-            Game.OnUpdate += Game_OnGameUpdate;
+            Game.OnGameUpdate += Game_OnGameUpdate;
             GameObject.OnDelete += LuxEgone;
             GameObject.OnCreate += GameObject_OnCreate;
             Drawing.OnDraw += OnDraw;
@@ -327,7 +327,7 @@ namespace ScientificLux
 
                 Q.Cast(qpred.CastPosition);
 
-            if (Config.Item("Qharassslowed").GetValue<bool>())
+            if (Config.Item("Qharassslow").GetValue<bool>())
                 return;
 
             if (target.IsValidTarget(Q.Range)
