@@ -106,6 +106,7 @@ namespace ScientificLux
             drawing.AddItem(new MenuItem("RLine", "Draw [R] Prediction").SetValue(new Circle(true, Color.SkyBlue)));
 
             harass.AddItem(new MenuItem("Qharass", "Use Q").SetValue(true));
+            harass.AddItem(new MenuItem("Qharassslowed", "Only use Q if target is slowed/stunned/rooted").SetValue(true));
             harass.AddItem(new MenuItem("Eharass", "Use E").SetValue(true));
             harass.AddItem(new MenuItem("harassmana", "Mana Percentage").SetValue(new Slider(30, 100, 0)));
 
@@ -307,14 +308,35 @@ namespace ScientificLux
             var qcollision = Q.GetCollision(player.ServerPosition.To2D(), new List<Vector2> { qpred.CastPosition.To2D() });
             var minioncol = qcollision.Where(x => !(x is Obj_AI_Hero)).Count(x => x.IsMinion);
 
+            if (E.IsReady() && target.IsValidTarget(E.Range) && Config.Item("Eharass").GetValue<bool>() && player.ManaPercentage() >= harassmana)
+                elogic();
+
+            if (target.IsValidTarget(Q.Range)
+                && minioncol <= 1
+                && Config.Item("Qharass").GetValue<bool>()
+                && qpred.Hitchance >= HitChance.VeryHigh && player.ManaPercentage() >= harassmana
+                && target.HasBuffOfType(BuffType.Slow) || target.IsValidTarget(Q.Range)
+                && minioncol <= 1
+                && Config.Item("Qharass").GetValue<bool>()
+                && qpred.Hitchance >= HitChance.VeryHigh && player.ManaPercentage() >= harassmana
+                && target.HasBuffOfType(BuffType.Stun) || target.IsValidTarget(Q.Range)
+                && minioncol <= 1
+                && Config.Item("Qharass").GetValue<bool>()
+                && qpred.Hitchance >= HitChance.VeryHigh && player.ManaPercentage() >= harassmana
+                && target.HasBuffOfType(BuffType.Snare))
+
+                Q.Cast(qpred.CastPosition);
+
+            if (Config.Item("Qharassslowed").GetValue<bool>())
+                return;
+
             if (target.IsValidTarget(Q.Range)
                     && minioncol <= 1
                     && Config.Item("Qharass").GetValue<bool>()
                     && qpred.Hitchance >= HitChance.VeryHigh && player.ManaPercentage() >= harassmana)
                     Q.Cast(qpred.CastPosition);
 
-            if (E.IsReady() && target.IsValidTarget(E.Range) && Config.Item("Eharass").GetValue<bool>() && player.ManaPercentage() >= harassmana)
-                elogic();
+
         }
         private static float IgniteDamage(Obj_AI_Hero target)
         {
