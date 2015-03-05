@@ -291,7 +291,7 @@ namespace ScientificLux
                         rdraw.Draw(Config.Item("RLine").GetValue<Circle>().Color, 4);
 
                     var orbwalkert = Orbwalker.GetTarget();
-                    Render.Circle.DrawCircle(orbwalkert.Position, 10, Color.DeepSkyBlue, 15);
+                    Render.Circle.DrawCircle(orbwalkert.Position, 80, Color.DeepSkyBlue, 7);
                 }
             }
         }
