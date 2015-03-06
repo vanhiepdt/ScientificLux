@@ -560,7 +560,7 @@ namespace ScientificLux
                             enemy.IsFacing(player) && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                             || player.HasBuffOfType(BuffType.Slow) && player.Position.CountEnemiesInRange(W.Range) >= 1 ||
                             player.HasBuffOfType(BuffType.Poison) && player.Position.CountEnemiesInRange(W.Range) >= 1
-                            || player.HasBuffOfType(BuffType.Snare) && player.Position.CountEnemiesInRange(W.Range) >= 1))
+                            || player.HasBuffOfType(BuffType.Snare) && player.Position.CountEnemiesInRange(W.Range) >= 1)
 
                         W.Cast(player.Position);
                 }

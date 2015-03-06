@@ -1,1 +1,11 @@
 C:\Users\HAF911\Documents\Visual Studio 2013\Projects\ScientificLux\ScientificLux\obj\Debug\ScientificLux.csprojResolveAssemblyReference.cache
+C:\Users\HAF911\Documents\Visual Studio 2013\Projects\ScientificLux\ScientificLux\bin\Release\ScientificLux.exe.config
+C:\Users\HAF911\Documents\Visual Studio 2013\Projects\ScientificLux\ScientificLux\bin\Release\ScientificLux.exe
+C:\Users\HAF911\Documents\Visual Studio 2013\Projects\ScientificLux\ScientificLux\bin\Release\ScientificLux.pdb
+C:\Users\HAF911\Documents\Visual Studio 2013\Projects\ScientificLux\ScientificLux\bin\Release\LeagueSharp.Common.dll
+C:\Users\HAF911\Documents\Visual Studio 2013\Projects\ScientificLux\ScientificLux\bin\Release\LeagueSharp.dll
+C:\Users\HAF911\Documents\Visual Studio 2013\Projects\ScientificLux\ScientificLux\bin\Release\SharpDX.Direct3D9.dll
+C:\Users\HAF911\Documents\Visual Studio 2013\Projects\ScientificLux\ScientificLux\bin\Release\SharpDX.dll
+C:\Users\HAF911\Documents\Visual Studio 2013\Projects\ScientificLux\ScientificLux\bin\Release\clipper_library.dll
+C:\Users\HAF911\Documents\Visual Studio 2013\Projects\ScientificLux\ScientificLux\obj\Debug\ScientificLux.exe
+C:\Users\HAF911\Documents\Visual Studio 2013\Projects\ScientificLux\ScientificLux\obj\Debug\ScientificLux.pdb
