@@ -530,6 +530,9 @@ namespace ScientificLux
 
         private static void wlogic()
         {
+
+            {
+            
             if (player.HasBuff("zedulttargetmark")
                 || player.HasBuff("soulshackles")
                 || player.HasBuff("vladimirhemoplage")
@@ -544,39 +547,49 @@ namespace ScientificLux
             if (player.HasBuff("Recall") || Utility.InFountain(player) || player.IsDead)
                 return;
 
-            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsAlly && h.IsMe))
-        
-            if (Config.Item("UseWP").GetValue<bool>() 
-             && (player.HealthPercentage() <= Config.Item("UseWHP").GetValue<Slider>().Value
-             && W.IsReady() && player.Position.CountEnemiesInRange(W.Range) >= 1 && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo) 
-             || player.HasBuffOfType(BuffType.Slow) && player.Position.CountEnemiesInRange(W.Range) >= 1  || player.HasBuffOfType(BuffType.Poison) && player.Position.CountEnemiesInRange(W.Range) >= 1 
-             || player.HasBuffOfType(BuffType.Snare)  && player.Position.CountEnemiesInRange(W.Range) >= 1)
 
-             W.Cast(hero.Position);
-            
-            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsAlly && !h.IsMe))
-            {
-                var wpred = W.GetPrediction(hero);
-                if (player.Distance(hero) > W.Range) return;
-                if (Config.Item("UseWA").GetValue<bool>() &&
-                    (hero.HealthPercentage() <= Config.Item("UseWAHP").GetValue<Slider>().Value && W.IsReady() &&
-                    hero.Distance(player.ServerPosition) <= W.Range && wpred.Hitchance >= HitChance.High) && hero.Position.CountEnemiesInRange(W.Range) >= 1
-                    || hero.HasBuffOfType(BuffType.Slow) && hero.Position.CountEnemiesInRange(W.Range) >= 1
-                    || hero.HasBuffOfType(BuffType.Poison) && hero.Position.CountEnemiesInRange(W.Range) >= 1
-                    || hero.HasBuffOfType(BuffType.Snare) && hero.Position.CountEnemiesInRange(W.Range) >= 1)
-                   
-                    W.Cast(wpred.CastPosition);
 
-                if (hero.HasBuff("zedulttargetmark")
-                    || hero.HasBuff("soulshackles")
-                    || hero.HasBuff("vladimirhemoplage")
-                    || hero.HasBuff("fallenonetarget")
-                    || hero.HasBuff("caitlynaceinthehole")
-                    || hero.HasBuff("fizzmarinerdoombomb")
-                    || hero.HasBuff("leblancsoulshackle")
-                    || hero.HasBuff("mordekaiserchildrenofthegrave"))
+                foreach (
+                    var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget()).Where(x => !x.IsZombie)
+                        .Where(x => !x.IsDead))
+                {
 
-                    W.Cast(wpred.CastPosition);
+                    if (Config.Item("UseWP").GetValue<bool>()
+                        && (player.HealthPercentage() <= Config.Item("UseWHP").GetValue<Slider>().Value
+                            && W.IsReady() && player.Position.CountEnemiesInRange(W.Range) >= 1 &&
+                            enemy.IsFacing(player) && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+                            || player.HasBuffOfType(BuffType.Slow) && player.Position.CountEnemiesInRange(W.Range) >= 1 ||
+                            player.HasBuffOfType(BuffType.Poison) && player.Position.CountEnemiesInRange(W.Range) >= 1
+                            || player.HasBuffOfType(BuffType.Snare) && player.Position.CountEnemiesInRange(W.Range) >= 1))
+
+                        W.Cast(player.Position);
+                }
+
+                foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsAlly && !h.IsMe))
+                {
+                    var wpred = W.GetPrediction(hero);
+                    if (player.Distance(hero) > W.Range) return;
+                    if (Config.Item("UseWA").GetValue<bool>() &&
+                        (hero.HealthPercentage() <= Config.Item("UseWAHP").GetValue<Slider>().Value && W.IsReady() &&
+                         hero.Distance(player.ServerPosition) <= W.Range && wpred.Hitchance >= HitChance.High) &&
+                        hero.Position.CountEnemiesInRange(W.Range) >= 1
+                        || hero.HasBuffOfType(BuffType.Slow) && hero.Position.CountEnemiesInRange(W.Range) >= 1
+                        || hero.HasBuffOfType(BuffType.Poison) && hero.Position.CountEnemiesInRange(W.Range) >= 1
+                        || hero.HasBuffOfType(BuffType.Snare) && hero.Position.CountEnemiesInRange(W.Range) >= 1)
+
+                        W.Cast(wpred.CastPosition);
+
+                    if (hero.HasBuff("zedulttargetmark")
+                        || hero.HasBuff("soulshackles")
+                        || hero.HasBuff("vladimirhemoplage")
+                        || hero.HasBuff("fallenonetarget")
+                        || hero.HasBuff("caitlynaceinthehole")
+                        || hero.HasBuff("fizzmarinerdoombomb")
+                        || hero.HasBuff("leblancsoulshackle")
+                        || hero.HasBuff("mordekaiserchildrenofthegrave"))
+
+                        W.Cast(wpred.CastPosition);
+                }
             }
         }
     
@@ -692,8 +705,7 @@ namespace ScientificLux
                 wlogic();
             }
 
-            if (LuxE != null &&
-                target.IsMoving
+            if (LuxE != null
                 && player.Distance(target) > Orbwalking.GetRealAutoAttackRange(player) &&
                 LuxE.Position.CountEnemiesInRange(E.Width) >= 1)
             {
