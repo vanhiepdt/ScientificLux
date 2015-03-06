@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
@@ -36,7 +38,7 @@ namespace ScientificLux
             Notifications.AddNotification("Scientific Lux - [V.2.2.4.1]", 8000);
 
             Q = new Spell(SpellSlot.Q, 1175);
-            Q.SetSkillshot(0.4f, 68f, 1200f, false, SkillshotType.SkillshotLine);
+            Q.SetSkillshot(0.25f, 68f, 1200f, false, SkillshotType.SkillshotLine);
 
             W = new Spell(SpellSlot.W, 1075);
             W.SetSkillshot(0.5f, 150f, 1200f, false, SkillshotType.SkillshotLine);
@@ -45,7 +47,7 @@ namespace ScientificLux
             E.SetSkillshot(0.4f, 275f, 1300f, false, SkillshotType.SkillshotCircle);
 
             R = new Spell(SpellSlot.R, 3340f);
-            R.SetSkillshot(1.50f, 190f, float.MaxValue, false, SkillshotType.SkillshotLine);
+            R.SetSkillshot(1.55f, 190f, float.MaxValue, false, SkillshotType.SkillshotLine);
 
             Config = new Menu("Scientific Lux", "STLux", true);
             Orbwalker = new Orbwalking.Orbwalker(Config.AddSubMenu(new Menu("[SL]: Orbwalker", "Orbwalker")));
