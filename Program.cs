@@ -593,6 +593,8 @@ namespace ScientificLux
         private static void elogic()
         {
             var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
+            if (target == null || !target.IsValidTarget())
+                return;
             var epred = E.GetPrediction(target);
             var emana = Config.Item("emana").GetValue<Slider>().Value;
 
@@ -702,6 +704,8 @@ namespace ScientificLux
                 wlogic();
             }
 
+            if (target == null || !target.IsValidTarget())
+                return;
             if (LuxE != null
                 && player.Distance(target) > Orbwalking.GetRealAutoAttackRange(player) &&
                 LuxE.Position.CountEnemiesInRange(E.Width) >= 1)
