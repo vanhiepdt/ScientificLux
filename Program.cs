@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
-using System.Drawing.Printing;
 using System.Linq;
-using System.Runtime.Remoting.Channels;
-using System.Security.Authentication.ExtendedProtection;
 using LeagueSharp;
 using LeagueSharp.Common;
-using LeagueSharp.Common.Data;
 using SharpDX;
-using SharpDX.Serialization;
 using Color = System.Drawing.Color;
 
 namespace ScientificLux
@@ -509,7 +503,7 @@ namespace ScientificLux
             && rpred.Hitchance >= HitChance.VeryHigh
             && Config.Item("UseR").GetValue<bool>()
             && target.HasBuff("luxilluminatingfraulein")
-            && predictedHealth <= rpdmg 
+            && target.Health <= rpdmg 
             && target.Path.Count() <= 1)
             R.Cast(rpred.CastPosition);                    
             
