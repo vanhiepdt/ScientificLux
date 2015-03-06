@@ -320,7 +320,7 @@ namespace ScientificLux
                 && qpred.Hitchance >= HitChance.VeryHigh && player.ManaPercentage() >= harassmana
                 && target.HasBuffOfType(BuffType.Snare))
 
-                Q.Cast(qpred.CastPosition);
+                Q.Cast(target);
 
             if (Config.Item("Qharassslowed").GetValue<bool>())
                 return;
@@ -329,7 +329,7 @@ namespace ScientificLux
                     && minioncol <= 1
                     && Config.Item("Qharass").GetValue<bool>()
                     && qpred.Hitchance >= HitChance.VeryHigh && player.ManaPercentage() >= harassmana)
-                    Q.Cast(qpred.CastPosition);
+                    Q.Cast(target);
 
 
         }
