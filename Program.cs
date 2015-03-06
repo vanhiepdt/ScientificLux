@@ -659,6 +659,8 @@ namespace ScientificLux
         private static void RFlogic()
         {
             var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
+            if (target == null || !target.IsValidTarget())
+                return;
 
             var trollR = (player.Position.Extend(target.Position, - 300));
 
@@ -672,6 +674,8 @@ namespace ScientificLux
         {
            var wmana = Config.Item("wmana").GetValue<Slider>().Value;
            var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
+           if (target == null || !target.IsValidTarget())
+               return;
            
            switch (Orbwalker.ActiveMode)
             {
