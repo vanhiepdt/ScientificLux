@@ -550,7 +550,7 @@ namespace ScientificLux
 
 
                 foreach (
-                    var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget()).Where(x => !x.IsZombie)
+                    var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(W.Range)).Where(x => !x.IsZombie)
                         .Where(x => !x.IsDead))
                 {
 
