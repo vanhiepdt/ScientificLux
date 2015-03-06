@@ -353,10 +353,7 @@ namespace ScientificLux
             }
 
             foreach (var enemy in
-                ObjectManager.Get<Obj_AI_Hero>()
-                    .Where(x => x.IsValidTarget())
-                    .Where(x => !x.IsZombie)
-                    .Where(x => !x.IsDead))
+                ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(R.Range)).Where(x => !x.IsZombie).Where(x => !x.IsDead))
                 {
                     Ignite = player.GetSpellSlot("summonerdot");
                     var qdmg = Q.GetDamage(enemy);
