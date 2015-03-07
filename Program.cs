@@ -265,7 +265,7 @@ namespace ScientificLux
                     
                     var rpredl = R.GetPrediction(target).CastPosition;
                     float predictedHealth = HealthPrediction.GetHealthPrediction(target,
-                        (int) (R.Delay + (player.Distance(target.ServerPosition)/R.Speed*500)));
+                    (int) (R.Delay + (player.Distance(target.ServerPosition)/R.Speed*500)));
                     var rdmg = R.GetDamage(target);
                     var rpdmg = R.GetDamage(target) + 10 + (8*player.Level) + player.FlatMagicDamageMod*0.2;
                     var rpred = R.GetPrediction(target);
@@ -278,17 +278,16 @@ namespace ScientificLux
                         && Config.Item("UseR").GetValue<bool>()
                         && target.HasBuff("luxilluminatingfraulein")
                         && predictedHealth <= rpdmg
-                        && target.Path.Count() < 2 ||
-                        target.IsValidTarget(R.Range)
+                        && target.IsValidTarget(R.Range)
                         && Config.Item("UseR").GetValue<bool>()
                         && R.IsReady()
                         && rpred.Hitchance >= HitChance.VeryHigh
-                        && predictedHealth <= rdmg
-                        && target.Path.Count() < 2)
+                        && predictedHealth <= rdmg)
 
                         rdraw.Draw(Config.Item("RLine").GetValue<Circle>().Color, 4);
 
                     var orbwalkert = Orbwalker.GetTarget();
+                    if (orbwalkert.IsValidTarget(R.Range))
                     Render.Circle.DrawCircle(orbwalkert.Position, 80, Color.DeepSkyBlue, 7);
                 }
             }
@@ -592,6 +591,7 @@ namespace ScientificLux
             var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
             if (target == null || !target.IsValidTarget())
                 return;
+
             var epred = E.GetPrediction(target);
             var emana = Config.Item("emana").GetValue<Slider>().Value;
 
@@ -700,15 +700,7 @@ namespace ScientificLux
             {
                 wlogic();
             }
-
-            if (target == null || !target.IsValidTarget())
-                return;
-            if (LuxE != null
-                && player.Distance(target) > Orbwalking.GetRealAutoAttackRange(player) &&
-                LuxE.Position.CountEnemiesInRange(E.Width) >= 1)
-            {
-                E.Cast();
             }
         }
     }
-}
+
