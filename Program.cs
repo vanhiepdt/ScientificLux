@@ -35,7 +35,7 @@ namespace ScientificLux
             if (player.ChampionName != ChampName)
                 return;
 
-            Notifications.AddNotification("Scientific Lux - [V.2.2.4.1]", 8000);
+            Notifications.AddNotification("Scientific Lux - [V.1.3.4.1]", 8000);
 
             Q = new Spell(SpellSlot.Q, 1175);
             Q.SetSkillshot(0.25f, 68f, 1200f, false, SkillshotType.SkillshotLine);
