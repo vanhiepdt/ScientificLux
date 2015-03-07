@@ -9,3 +9,4 @@ C:\Users\HAF911\Documents\Visual Studio 2013\Projects\ScientificLux\ScientificLu
 C:\Users\HAF911\Documents\Visual Studio 2013\Projects\ScientificLux\ScientificLux\bin\Release\LeagueSharp.xml
 C:\Users\HAF911\Documents\Visual Studio 2013\Projects\ScientificLux\ScientificLux\obj\Debug\ScientificLux.exe
 C:\Users\HAF911\Documents\Visual Studio 2013\Projects\ScientificLux\ScientificLux\obj\Debug\ScientificLux.pdb
+C:\Users\HAF911\Documents\Visual Studio 2013\Projects\ScientificLux\ScientificLux\obj\Debug\ScientificLux.csprojResolveAssemblyReference.cache

@@ -97,6 +97,8 @@ namespace ScientificLux
             drawing.AddItem(new MenuItem("Rdraw", "Draw R Range").SetValue(new Circle(true, Color.CornflowerBlue)));
             drawing.AddItem(new MenuItem("RLine", "Draw [R] Prediction").SetValue(new Circle(true, Color.SkyBlue)));
 
+
+            jungleclear.AddItem(new MenuItem("autoharass", "AutoHarass Toggle").SetValue(new KeyBind('L', KeyBindType.Toggle)));
             harass.AddItem(new MenuItem("Qharass", "Use Q").SetValue(true));
             harass.AddItem(new MenuItem("Qharassslowed", "Only use Q if target is slowed/stunned/rooted").SetValue(true));
             harass.AddItem(new MenuItem("Eharass", "Use E").SetValue(true));
@@ -295,7 +297,8 @@ namespace ScientificLux
         private static void Harass()
         {
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-
+            if (target == null || !target.IsValidTarget())
+                return;
             if (target.IsInvulnerable)
                 return;
             var harassmana = Config.Item("harassmana").GetValue<Slider>().Value;
@@ -352,6 +355,7 @@ namespace ScientificLux
                     var rpred = R.GetPrediction(enemy);
                     var qpred = Q.GetPrediction(enemy);
                     var epred = E.GetPrediction(enemy);
+
                     float predictedHealth = HealthPrediction.GetHealthPrediction(enemy, (int)(R.Delay + (player.Distance(enemy.ServerPosition) / R.Speed*1000)));
                     if (enemy.Health < edmg && epred.Hitchance >= HitChance.High && E.IsReady() && Config.Item("KSE").GetValue<bool>())
                         E.Cast(enemy);
@@ -687,6 +691,10 @@ namespace ScientificLux
             if (Config.Item("SmartKS").GetValue<bool>())
             {
                 killsteal();
+            }
+            if (Config.Item("autoharass").GetValue<KeyBind>().Active)
+            {
+                Harass();
             }
             if (Config.Item("UseW").GetValue<bool>() && player.ManaPercentage() >= wmana)
             {
