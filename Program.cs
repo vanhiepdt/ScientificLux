@@ -342,12 +342,6 @@ namespace ScientificLux
 
         private static void killsteal()
         {
-            {
-            if (!R.IsReady())
-            {
-                return;
-            }
-
             foreach (var enemy in
                 ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(R.Range)).Where(x => !x.IsZombie).Where(x => !x.IsDead))
                 {
@@ -373,9 +367,12 @@ namespace ScientificLux
                         epred.Hitchance >= HitChance.High)
                         return;
 
+                    if (predictedHealth < rdmg && enemy.CountAlliesInRange(400) >= 2)
+                        return;
+
                     if (predictedHealth < rdmg && rpred.Hitchance >= HitChance.High && R.IsReady() && Config.Item("KSR").GetValue<bool>())
                         R.Cast(rpred.CastPosition);
-                }
+                
             }
         }
 
@@ -633,21 +630,15 @@ namespace ScientificLux
             var qpred = Q.GetPrediction(target, true);
             var qcollision = Q.GetCollision(player.ServerPosition.To2D(), new List<Vector2> { qpred.CastPosition.To2D() });
             var minioncol = qcollision.Where(x => !(x is Obj_AI_Hero)).Count(x => x.IsMinion);
-
-            if (Q.IsReady() && qpred.Hitchance >= HitChance.High && target.IsValidTarget(Q.Range))          
-            {
-                if (target.IsDashing()
-                    && qpred.Hitchance >= HitChance.Dashing
-                    && minioncol <= 1 && player.ManaPercentage() >= qmana && Config.Item("UseQ").GetValue<bool>())
-                    Q.Cast(qpred.CastPosition);
-
-                else if (target.IsValidTarget(Q.Range)
+       
+                  if (target.IsValidTarget(Q.Range)
                     && minioncol <= 1
+                    && Q.IsReady()
                     && qpred.Hitchance >= HitChance.VeryHigh && player.ManaPercentage() >= qmana && Config.Item("UseQ").GetValue<bool>())
                     Q.Cast(qpred.CastPosition);
-            }
+            
 
-            else if (E.IsReady() && target.IsValidTarget(E.Range) && Config.Item("UseE").GetValue<bool>())
+            if (E.IsReady() && target.IsValidTarget(E.Range) && Config.Item("UseE").GetValue<bool>())
                 elogic();
 
             if (player.Distance(target) <= 600 && IgniteDamage(target) >= target.Health &&
@@ -674,8 +665,6 @@ namespace ScientificLux
         {
            var wmana = Config.Item("wmana").GetValue<Slider>().Value;
            var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
-           if (target == null || !target.IsValidTarget())
-               return;
            
            switch (Orbwalker.ActiveMode)
             {
