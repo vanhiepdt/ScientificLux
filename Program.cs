@@ -98,7 +98,7 @@ namespace ScientificLux
             drawing.AddItem(new MenuItem("RLine", "Draw [R] Prediction").SetValue(new Circle(true, Color.SkyBlue)));
 
 
-            jungleclear.AddItem(new MenuItem("autoharass", "AutoHarass Toggle").SetValue(new KeyBind('L', KeyBindType.Toggle)));
+            harass.AddItem(new MenuItem("autoharass", "AutoHarass Toggle").SetValue(new KeyBind('L', KeyBindType.Toggle)));
             harass.AddItem(new MenuItem("Qharass", "Use Q").SetValue(true));
             harass.AddItem(new MenuItem("Qharassslowed", "Only use Q if target is slowed/stunned/rooted").SetValue(true));
             harass.AddItem(new MenuItem("Eharass", "Use E").SetValue(true));
